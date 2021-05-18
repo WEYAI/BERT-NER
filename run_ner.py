@@ -287,11 +287,12 @@ def main():
     parser.add_argument("--do_train",
                         action='store_true',
                         help="Whether to run training.")
+    #  These are special cases of 'store_const' used for storing the values True and False respectively.
     parser.add_argument("--do_eval",
                         action='store_true',
                         help="Whether to run eval or not.")
+                
     parser.add_argument("--eval_on",
-                        default="dev",
                         help="Whether to run eval on the dev set or test set.")
     parser.add_argument("--do_lower_case",
                         action='store_true',
@@ -356,14 +357,16 @@ def main():
     args.data_dir = "data/"
     args.bert_model = "bert-base-cased"
     args.task_name = "ner"
-    args.output_dir = "out_518"
+    args.output_dir = "out_base" # output model path,if  
     args.max_seq_length = 128
     # args.do_train = "bert-base-cased/"
     args.num_train_epochs = 5
     args.warmup_proportion = 0.1
-    args.do_train = True
-    args.do_eval = False
- 
+    # args.do_train = True
+    args.do_eval = True
+    # args.eval_on = "dev"
+    args.eval_on = "test" # dev ,test
+    
     # if args.server_ip and args.server_port:
     #     # Distant debugging - see https://code.visualstudio.com/docs/python/debugging#_attach-to-a-local-script
     #     import ptvsd
@@ -492,7 +495,9 @@ def main():
             nb_tr_examples, nb_tr_steps = 0, 0
             for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
                 batch = tuple(t.to(device) for t in batch)
+                # 32*128 :B*T    32*128      32*128        32*128    32*128   32*128
                 input_ids, input_mask, segment_ids, label_ids, valid_ids,l_mask = batch
+                
                 loss = model(input_ids, segment_ids, input_mask, label_ids,valid_ids,l_mask)
                 if n_gpu > 1:
                     loss = loss.mean() # mean() to average on multi-gpu.
@@ -558,6 +563,7 @@ def main():
         y_true = []
         y_pred = []
         label_map = {i : label for i, label in enumerate(label_list,1)}
+        # 8*128:B*T 8*128:B*T  8*128:B*T  8*128:B*T  8*128:B*T 8*128:B*T
         for input_ids, input_mask, segment_ids, label_ids,valid_ids,l_mask in tqdm(eval_dataloader, desc="Evaluating"):
             input_ids = input_ids.to(device)
             input_mask = input_mask.to(device)
@@ -567,6 +573,7 @@ def main():
             l_mask = l_mask.to(device)
 
             with torch.no_grad():
+                # 8*128            
                 logits = model(input_ids, segment_ids, input_mask,valid_ids=valid_ids,attention_mask_label=l_mask)
 
             logits = torch.argmax(F.log_softmax(logits,dim=2),dim=2)
