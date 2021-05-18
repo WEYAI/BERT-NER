@@ -255,26 +255,22 @@ def convert_examples_to_features(examples, label_list, max_seq_length, tokenizer
 
 def main():
     parser = argparse.ArgumentParser()
-
-    ## Required parameters
+        ## Required parameters
     parser.add_argument("--data_dir",
-                        default=None,
+                        default="data/",
                         type=str,
-                        required=True,
                         help="The input data dir. Should contain the .tsv files (or other data files) for the task.")
-    parser.add_argument("--bert_model", default=None, type=str, required=True,
+    parser.add_argument("--bert_model", default="bert-base-cased", type=str,
                         help="Bert pre-trained model selected in the list: bert-base-uncased, "
                         "bert-large-uncased, bert-base-cased, bert-large-cased, bert-base-multilingual-uncased, "
                         "bert-base-multilingual-cased, bert-base-chinese.")
     parser.add_argument("--task_name",
-                        default=None,
+                        default="ner",
                         type=str,
-                        required=True,
                         help="The name of the task to train.")
     parser.add_argument("--output_dir",
-                        default=None,
+                        default="out_base",
                         type=str,
-                        required=True,
                         help="The output directory where the model predictions and checkpoints will be written.")
 
     ## Other parameters
@@ -313,7 +309,7 @@ def main():
                         type=float,
                         help="The initial learning rate for Adam.")
     parser.add_argument("--num_train_epochs",
-                        default=3.0,
+                        default=5.0,
                         type=float,
                         help="Total number of training epochs to perform.")
     parser.add_argument("--warmup_proportion",
@@ -356,13 +352,24 @@ def main():
     parser.add_argument('--server_ip', type=str, default='', help="Can be used for distant debugging.")
     parser.add_argument('--server_port', type=str, default='', help="Can be used for distant debugging.")
     args = parser.parse_args()
-
-    if args.server_ip and args.server_port:
-        # Distant debugging - see https://code.visualstudio.com/docs/python/debugging#_attach-to-a-local-script
-        import ptvsd
-        print("Waiting for debugger attach")
-        ptvsd.enable_attach(address=(args.server_ip, args.server_port), redirect_output=True)
-        ptvsd.wait_for_attach()
+   
+    args.data_dir = "data/"
+    args.bert_model = "bert-base-cased"
+    args.task_name = "ner"
+    args.output_dir = "out_518"
+    args.max_seq_length = 128
+    # args.do_train = "bert-base-cased/"
+    args.num_train_epochs = 5
+    args.warmup_proportion = 0.1
+    args.do_train = True
+    args.do_eval = False
+ 
+    # if args.server_ip and args.server_port:
+    #     # Distant debugging - see https://code.visualstudio.com/docs/python/debugging#_attach-to-a-local-script
+    #     import ptvsd
+    #     print("Waiting for debugger attach")
+    #     ptvsd.enable_attach(address=(args.server_ip, args.server_port), redirect_output=True)
+    #     ptvsd.wait_for_attach()
 
     processors = {"ner":NerProcessor}
 
